@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root {
+            /* Modern Healthcare Color Palette */
+            --primary-blue: #2c7be5;
+            --primary-light-blue: #d2e3fc;
+            --secondary-green: #27ae60;
+            --secondary-light-green: #d5f5e3;
+            --dark-text: #334155;
+            --light-text: #64748b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --border-radius: 12px;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-family);
+            color: var(--dark-text);
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 95%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .sidebar {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            height: 100%;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 12px;
+        }
+
+        .nav-item {
+            margin-bottom: 10px;
+            border-radius: 10px;
+            padding: 12px 16px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--dark-text);
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--primary-light-blue);
+            color: var(--primary-blue);
+        }
+
+        .nav-item.active {
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: var(--primary-blue);
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-item .dropdown-toggle::after {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .submenu {
+            padding-left: 20px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            transition: var(--transition);
+            color: var(--light-text);
+        }
+        
+        .submenu-item:hover {
+            background-color: var(--primary-light-blue);
+            color: var(--primary-blue);
+        }
+        
+        .submenu-item.active {
+            background-color: var(--primary-light-blue);
+            color: var(--primary-blue);
+            font-weight: 500;
+        }
+
+        hr {
+            border-color: var(--border-color);
+            margin: 15px 0;
+            opacity: 0.3;
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-filter {
+            padding: 8px 16px;
+            background-color: var(--primary-light-blue);
+            color: var(--primary-blue);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .chart-filter:hover {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .iframe-container {
+            height: 1000px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .iframe-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary-light-blue);
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .iframe-controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+            gap: 12px;
+        }
+
+        .iframe-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: var(--primary-light-blue);
+            color: var(--primary-blue);
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .iframe-btn:hover {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .filter-dropdown {
+            position: absolute;
+            top: 42px;
+            right: 0;
+            width: 180px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .filter-option {
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .filter-option:hover {
+            background-color: var(--primary-light-blue);
+            color: var(--primary-blue);
+        }
+        
+        .filter-option.active {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        
+        .filter-option.active i {
+            visibility: visible;
+        }
+        
+        .filter-option i {
+            visibility: hidden;
+        }
+
+        /* For Mobile Responsiveness */
+        @media (max-width: 767.98px) {
+            .dashboard-container {
+                padding: 15px;
+                width: 98%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="sidebar">
+                    <div class="nav-profile">
+                        <div class="profile-pic">
+                            <i class="fa-solid fa-hospital"></i>
+                        </div>
+                        <div>
+                            <span class="fw-bold">Hospital Management</span>
+                            <div class="small text-muted">Dashboard</div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    
+                    <div class="sidebar-menu">
+                        <div class="nav-item active" data-target="http://localhost:3000/public/dashboard/d65691fc-25c0-45b3-9c9b-7dd741d9e0b9" data-filter="Overview">
+                            <i class="fas fa-home"></i> 
+                            <span>Dashboard</span>
+                        </div>
+
+                        <!-- Patient Analytics -->
+                        <div class="nav-item dropdown-toggle">
+                            <i class="fa-solid fa-hospital-user"></i>
+                            <span>Patient Analytics</span>
+                            <i class="fas fa-chevron-down float-end mt-1"></i>
+                        </div>
+                        <div class="submenu" id="submenu-1">
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/35478d5e-bd8a-4c3c-b622-64b67f4bd85a" data-filter="Patient Insights Dashboard">
+                                <span>Patient Insights Dashboard</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/9ca325c6-337e-4a3c-ac40-4dc0eae9d921" data-filter="Monthly Patient Report">
+                                <span>Monthly Patient Report</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/383f6098-98b5-4b38-9109-f1cc173fc81f" data-filter="Appointment Report">
+                                <span>Appointment Report</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/2019360b-05aa-4e23-9763-a08a1961bfd5" data-filter="Patient Demographics Report">
+                                <span>Patient Demographics Report</span>
+                            </div>
+                        </div>
+
+                        <!-- Appointments & Doctor Performance -->
+                        <div class="nav-item dropdown-toggle">
+                            <i class="fa-solid fa-user-doctor"></i>
+                            <span>Staff Analytics</span>
+                            <i class="fas fa-chevron-down float-end mt-1"></i>
+                        </div>
+                        <div class="submenu" id="submenu-2">
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/97151c57-a8c7-48ae-8f8b-55107e0cf742" data-filter="Performance">
+                                <span>Staff Productivity & Performance Dashboard</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/07fe2979-d92d-4a60-aea9-bd84f5420cd2" data-filter="Department Performance">
+                                <span>Department Performance Comparison</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/bb0eb6ba-101a-4132-a631-95c78339ef2a" data-filter="Provider Efficiency Rankings">
+                                <span>Provider Efficiency Rankings</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/56bc0561-17b5-420a-bb71-ff4d945553ac" data-filter="Specialty Performance Metrics">
+                                <span>Specialty Performance Metrics</span>
+                            </div>
+                        </div>
+
+                        <!-- Finance Section -->
+                        <div class="nav-item dropdown-toggle">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Resource & Cost Analysis</span>
+                            <i class="fas fa-chevron-down float-end mt-1"></i>
+                        </div>
+                        <div class="submenu" id="submenu-3">
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/03a6f4e2-5184-49f8-a472-cacdd9d54ef5" data-filter="Revenue">
+                                <span>Resource & Cost Overview Dashboard</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/11dec0b9-5e33-4ebe-b22b-7b9eb40fc57a" data-filter="Service Cost Analysis">
+                                <span>Service Cost Analysis</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/f0d41f76-2803-43d9-b133-17dc4b8df1cf" data-filter="Room Utilization Analysis">
+                                <span>Room Utilization Analysis</span>
+                            </div>
+                            <div class="submenu-item" data-target="http://localhost:3000/public/dashboard/c3d7f26a-398f-4584-9dbd-3cc36ee222fe" data-filter="Top Revenue Generating Departments">
+                                <span>Top Revenue Generating Departments</span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Profile Section -->
+                        <div class="nav-item" data-target="/api/placeholder/800/600?text=User+Profile" data-filter="Profile">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </div>
+
+                        <!-- Settings -->
+                        <div class="nav-item" data-target="/api/placeholder/800/600?text=System+Settings" data-filter="Settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="header">
+                    <h3 class="m-0">Dashboard</h3>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-light position-relative me-2" aria-label="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.2rem 0.4rem;">
+                                3
+                            </span> -->
+                        </button>
+                        <button class="btn btn-outline-primary">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Main Content - Just the iframe -->
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <h6 class="m-0 fw-bold">Hospital Analytics Dashboard</h6>
+                        <div class="chart-filter">
+                            <span>Overview</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container">
+                        <div class="iframe-loading" id="loading-indicator">
+                            <div class="spinner"></div>
+                        </div>
+                        <iframe id="contentFrame" src="http://localhost:3000/public/dashboard/d65691fc-25c0-45b3-9c9b-7dd741d9e0b9" allowfullscreen></iframe>
+                    </div>
+                    
+                    <div class="iframe-controls">
+                        <button class="iframe-btn" id="refresh-iframe">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Refresh</span>
+                        </button>
+                        <button class="iframe-btn" id="fullscreen-btn">
+                            <i class="fas fa-expand"></i>
+                            <span>Fullscreen</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#loading-indicator").show();
+
+            $("#contentFrame").on("load", function() {
+                $("#loading-indicator").fadeOut(300);
+            });
+
+            function loadContent(element) {
+                const target = $(element).data('target');
+                const filter = $(element).data('filter');
+                
+                if (target) {
+                    $("#loading-indicator").show();
+
+                    $('#contentFrame').attr('src', target);
+                }
+                
+                if (filter) {
+                    $('.chart-filter span').text(filter);
+                }
+            }
+
+            $('.nav-item.dropdown-toggle').on('click', function() {
+                const targetSubmenu = $(this).next('.submenu');
+
+                if (!targetSubmenu.hasClass('show')) {
+                    $('.submenu.show').slideUp(200).removeClass('show');
+                }
+
+                targetSubmenu.slideToggle(200).toggleClass('show');
+
+                $(this).find('.fa-chevron-down').toggleClass('fa-rotate-180');
+            });
+
+            $('.nav-item:not(.dropdown-toggle)').on('click', function() {
+                $('.nav-item').removeClass('active');
+                $(this).addClass('active');
+                loadContent(this);
+            });
+
+            $('.submenu-item').on('click', function(e) {
+                e.stopPropagation();
+
+                $('.submenu-item').removeClass('active');
+                $(this).addClass('active');
+
+                $('.nav-item').removeClass('active');
+                $(this).closest('.submenu').prev('.nav-item').addClass('active');
+                
+                // Load content
+                loadContent(this);
+            });
+
+            $('#refresh-iframe').on('click', function() {
+                $("#loading-indicator").show();
+                
+                $('#contentFrame').attr('src', $('#contentFrame').attr('src'));
+            });
+
+            $('#fullscreen-btn').on('click', function() {
+                const iframe = document.getElementById('contentFrame');
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
+            });
+
+            setTimeout(function() {
+                $("#loading-indicator").fadeOut(300);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
